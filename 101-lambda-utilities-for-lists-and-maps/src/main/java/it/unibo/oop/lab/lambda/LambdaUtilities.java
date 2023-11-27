@@ -58,11 +58,10 @@ public final class LambdaUtilities {
      *         otherwise.
      */
     public static <T> List<Optional<T>> optFilter(final List<T> list, final Predicate<T> pre) {
-        /*
-         * Suggestion: consider Optional.filter
-         */
-        return null;
-    }
+        List<Optional<T>> arrayList= new ArrayList<>(); 
+        list.forEach(o -> arrayList.add( pre.test(o) ? Optional.ofNullable(o) : Optional.empty()));
+        return arrayList;
+    } 
 
     /**
      * @param list
