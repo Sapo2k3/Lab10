@@ -19,6 +19,11 @@ public interface DrawNumberView {
      * Informs the user that the inserted number is not correct.
      */
     void numberIncorrect();
+    /**
+     * @param message error message to show.
+     * 
+     */
+    void displayError(String message);
 
     /**
      * @param res the result of the last draw

@@ -117,4 +117,12 @@ public final class DrawNumberViewImpl implements DrawNumberView {
     private void plainMessage(final String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Result", JOptionPane.PLAIN_MESSAGE);
     }
+
+    @Override
+    public void displayError(String message) {
+        if (message.isBlank()){
+            throw new IllegalArgumentException("The error message is an empty String.");
+        }
+        JOptionPane.showMessageDialog(frame, message);
+    }
 }
