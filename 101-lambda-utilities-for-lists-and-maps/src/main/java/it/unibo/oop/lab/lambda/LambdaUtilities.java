@@ -59,8 +59,8 @@ public final class LambdaUtilities {
      *         otherwise.
      */
     public static <T> List<Optional<T>> optFilter(final List<T> list, final Predicate<T> pre) {
-        List<Optional<T>> arrayList= new ArrayList<>(); 
-        list.forEach(o -> arrayList.add( pre.test(o) ? Optional.ofNullable(o) : Optional.empty()));
+        final List<Optional<T>> arrayList = new ArrayList<>(); 
+        list.forEach(o -> arrayList.add(pre.test(o) ? Optional.ofNullable(o) : Optional.empty()));
         return arrayList;
     } 
 
@@ -77,7 +77,7 @@ public final class LambdaUtilities {
      *         based on the mapping done by the function
      */
     public static <R, T> Map<R, Set<T>> group(final List<T> list, final Function<T, R> op) {
-        Map<R, Set<T>> map = new HashMap<>();
+       final  Map<R, Set<T>> map = new HashMap<>();
         list.forEach(o -> map.merge(op.apply(o), new HashSet<>(List.of(o)), (existingSet, newElement) -> { 
             existingSet.add(newElement.iterator().next());
             return existingSet;
@@ -103,12 +103,11 @@ public final class LambdaUtilities {
          *
          * Keep in mind that a map can be iterated through its forEach method
          */
-         Map<K, V> mapToFill = new HashMap<>();
+        final Map<K, V> mapToFill = new HashMap<>();
         map.forEach((k, v) -> {
-            if(v.orElse(null) == null){
+            if (v.orElse(null) == null) {
                 mapToFill.put(k, def.get());
-            }
-            else {
+            } else {
                 mapToFill.put(k, v.get());
             }
         });
@@ -146,3 +145,4 @@ public final class LambdaUtilities {
          */
     }
 }
+
