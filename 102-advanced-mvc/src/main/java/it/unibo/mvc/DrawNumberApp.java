@@ -45,8 +45,13 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
                         ATTEMPTS=val;
                     }
                 }
+                else {
+                    throw new IllegalArgumentException("Wrong input file format");
+                }
             });
-
+            if(MAX < MIN){
+                throw new IllegalArgumentException("The max value can't be smaller than min's.");
+            }
         } catch (IOException | NumberFormatException e) {
            displayError(e.getMessage());
         }
