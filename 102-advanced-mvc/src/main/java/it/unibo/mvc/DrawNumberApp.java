@@ -1,11 +1,11 @@
 package it.unibo.mvc;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -19,41 +19,68 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
     private final DrawNumber model;
     private final List<DrawNumberView> views;
 
-    private void config(){
+    private void config(final String configFile){
         List<String> lines = new ArrayList<>();
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("config.yml");
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream(configFile);
         try (final BufferedReader buffReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            for(int i=0 ; i < 2 ; i++){
-                lines.add(buffReader.readLine());
+            for(int i=0 ; i < 3 ; i++){
+                try {
+                    lines.add(buffReader.readLine());
+                } catch ( IllegalArgumentException | UnsupportedOperationException e){
+                    for(final DrawNumberView view : views){
+                        view.displayError(e.getMessage());
+                    }
+                }      
             }
-            final List<Integer> splittedString = new ArrayList<>();
-            lines.forEach(o -> splittedString.add(Integer.parseInt(o.split(": ").toString())));
-            MIN=splittedString.get(0);
-            MAX=splittedString.get(1);
-            ATTEMPTS=splittedString.get(2);
-        } catch (Exception e) {
-            e.getMessage();
+            lines.forEach(o -> {
+                final String[] splittedString;
+                splittedString = o.split(": ");
+                if(splittedString.length == 2){
+                    final int val = Integer.parseInt(splittedString[1]);
+                    if(splittedString[0].contains("max")) {
+                        MAX=val;
+                    } else if(splittedString[0].contains("min")) {
+                        MIN=val;
+                    } else if(splittedString[0].contains("attempts")) {
+                        ATTEMPTS=val;
+                    }
+                }
+            });
+
+        } catch (IOException | NumberFormatException e) {
+           displayError(e.getMessage());
+        }
+    }
+
+    private void displayError(final String message) {
+        for (final DrawNumberView view: views) {
+            view.displayError(message);
         }
     }
 
     /**
      * @param views
      *            the views to attach
+     * @throws IOException
      */
-    public DrawNumberApp(final DrawNumberView... views) {
+    public DrawNumberApp(final String configFile, final DrawNumberView... views) throws IOException {
         /*
          * Side-effect proof
          */
         this.views = Arrays.asList(Arrays.copyOf(views, views.length));
         for (final DrawNumberView view: views) {
+            if(configFile.isBlank()){
+                view.displayError(configFile);
+                throw new java.io.IOException("Specify a file name");
+            }
             view.setObserver(this);
             view.start();
         }
-        config();
+        config(configFile);
         this.model = new DrawNumberImpl(MIN, MAX, ATTEMPTS);
     }
 
-    @Override
+    @Override  
     public void newAttempt(final int n) {
         try {
             final DrawResult result = model.attempt(n);
@@ -89,7 +116,14 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
      * @throws FileNotFoundException 
      */
     public static void main(final String... args) throws FileNotFoundException {
-        new DrawNumberApp(new DrawNumberViewImpl());
+        try {
+            new DrawNumberApp("config.yml", 
+                    new DrawNumberViewImpl(),
+                    new DrawNumberViewImpl(),
+                    new PrintStreamView(System.out),
+                    new PrintStreamView("output.log"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
 }
